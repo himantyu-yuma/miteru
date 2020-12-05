@@ -1,12 +1,32 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>miteru</title>
+    <style>
+        .video-wrapper{
+            position: relative;
+        }
+        .eyecon{
+            position: absolute;
+            width: 10rem;
+            left: 0;
+            bottom: 0;
+        }
+    </style>
 </head>
+
 <body>
-    
+    <div class="video-wrapper" id="local-video-wrapper">
+        <video id="local-video" autoplay muted="true"></video>
+        <!-- <img src="img/eyecon.png" class="eyecon"> -->
+    </div>
+    <div class="video-wrapper" id="video-container"></div>
+
+    <button id="join-btn">JOIN</button>
+
     <script src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
     <script src="js/key.js"></script>
     <script>
@@ -15,7 +35,7 @@
 
         const main = async () => {
             const localStream = await navigator.mediaDevices.getUserMedia({
-                video:true,
+                video: true,
                 audio: true
             });
             localVideo.srcObject = localStream;
@@ -25,8 +45,10 @@
                 debug: 3,
             });
 
+            let myId;
             peer.on('open', (id) => {
-                localId.textContent = id;
+                console.log(id);
+                myId = id;
             });
 
             // ルームに入るための関数
@@ -52,6 +74,11 @@
                     videoContainer.append(remoteVideo);
 
                     await remoteVideo.play().catch(console.error);
+
+                    // 見るイベント追加
+                    remoteVideo.addEventListener('mouseover', () => {
+                        room.send({type: 'look', target: stream.peerId});
+                    });
                 });
 
                 room.on('peerLeave', peerId => {
@@ -64,9 +91,38 @@
                     remoteVideo.remove();
 
                     console.log(peerId + 'が退出しました。')
-                })
+                });
+
+                const beLook = () => {
+                    // 見られたとき
+                    const eyecon = document.createElement('img');
+                    eyecon.src = 'img/eyecon.png';
+                    eyecon.classList.add('eyecon');
+
+                    document.getElementById('local-video-wrapper').append(eyecon);
+                }
+
+                room.on('data', data => {
+                    console.log(data);
+                    console.log(data.data.type);
+                    // 見られたイベントが発火したとき
+                    if(data.data.type == 'look' && data.data.target == myId){
+                        beLook();
+                    }
+                });
+
+
             }
+
+            document.getElementById('join-btn').addEventListener('click', () => {
+                joinRoom();
+            });
+        }
+
+        window.onload = () => {
+            main();
         }
     </script>
 </body>
+
 </html>

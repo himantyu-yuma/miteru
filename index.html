@@ -6,14 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>miteru</title>
     <style>
-        .video-wrapper{
+        .video-wrapper {
             position: relative;
         }
-        .eyecon{
+
+        #eyecontainer {
             position: absolute;
-            width: 10rem;
             left: 0;
             bottom: 0;
+        }
+
+        .eyecon {
+            width: 10rem;
         }
     </style>
 </head>
@@ -22,6 +26,9 @@
     <div class="video-wrapper" id="local-video-wrapper">
         <video id="local-video" autoplay muted="true"></video>
         <!-- <img src="img/eyecon.png" class="eyecon"> -->
+        <div id="eyecontainer">
+
+        </div>
     </div>
     <div class="video-wrapper" id="video-container"></div>
 
@@ -32,6 +39,7 @@
     <script>
         const localVideo = document.getElementById('local-video');
         const videoContainer = document.getElementById('video-container');
+        const eyecontainer = document.getElementById('eyecontainer');
 
         const main = async () => {
             const localStream = await navigator.mediaDevices.getUserMedia({
@@ -77,12 +85,15 @@
 
                     // 見るイベント追加
                     remoteVideo.addEventListener('mouseover', () => {
-                        room.send({type: 'look', target: stream.peerId});
+                        // 見てる状態を解除
+                        room.send({ type: 'unlook' });
+                        // 新しく見てる人
+                        room.send({ type: 'look', target: stream.peerId });
                     });
                 });
 
                 room.on('peerLeave', peerId => {
-                    const remoteVideo = videoContainer.querySelector(`[data-peer-id=${peerId}]`);
+                    const remoteVideo = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
                     remoteVideo.srcObject.getTracks().forEach(track => {
                         track.stop();
                     });
@@ -93,25 +104,34 @@
                     console.log(peerId + 'が退出しました。')
                 });
 
-                const beLook = () => {
+                const beLook = peerId => {
                     // 見られたとき
                     const eyecon = document.createElement('img');
                     eyecon.src = 'img/eyecon.png';
                     eyecon.classList.add('eyecon');
+                    eyecon.setAttribute('data-peer-id', peerId);
 
-                    document.getElementById('local-video-wrapper').append(eyecon);
+                    document.getElementById('eyecontainer').append(eyecon);
+                }
+
+                const unlook = peerId => {
+                    // 視線解除されたとき
+                    const eyecon = eyecontainer.querySelector(`[data-peer-id="${peerId}"]`);
+                    eyecon.remove();
                 }
 
                 room.on('data', data => {
                     console.log(data);
                     console.log(data.data.type);
-                    // 見られたイベントが発火したとき
-                    if(data.data.type == 'look' && data.data.target == myId){
-                        beLook();
+                    if (data.data.type == 'look' && data.data.target == myId) {
+                        // 見られたイベントが発火したとき
+                        beLook(data.src);
+                    } else if (data.data.type == 'unlook') {
+                        // 視線解除イベントが発火したとき
+                        console.log(data.src)
+                        unlook(data.src)
                     }
                 });
-
-
             }
 
             document.getElementById('join-btn').addEventListener('click', () => {

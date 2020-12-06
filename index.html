@@ -19,10 +19,27 @@
         .eyecon {
             width: 10rem;
         }
+
+        body {
+            cursor: url(/img/eyecon.png), auto;
+        }
+
+        #stalker {
+            pointer-events: none;
+            position: fixed;
+            top: -8px;
+            left: -8px;
+            width: 10rem;
+            transform: translate(0, 0);
+            transition: transform 0.2s;
+            transition-timing-function: ease-out;
+            z-index: 999
+        }
     </style>
 </head>
 
 <body>
+    <img id="stalker" src="/img/eyecon.png" alt="">
     <div class="video-wrapper" id="local-video-wrapper">
         <video id="local-video" autoplay muted="true"></video>
         <!-- <img src="img/eyecon.png" class="eyecon"> -->
@@ -139,8 +156,19 @@
             });
         }
 
+        const stalker = () => {
+            //マウスストーカー用のdivを取得
+            const stalker = document.getElementById('stalker');
+
+            //上記のdivタグをマウスに追従させる処理
+            document.addEventListener('mousemove', function (e) {
+                stalker.style.transform = 'translate(' + e.clientX + 'px, ' + e.clientY + 'px)';
+            });
+        }
+        
         window.onload = () => {
             main();
+            stalker();
         }
     </script>
 </body>

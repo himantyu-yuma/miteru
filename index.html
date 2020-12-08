@@ -33,7 +33,13 @@
             transform: translate(0, 0);
             transition: transform 0.2s;
             transition-timing-function: ease-out;
-            z-index: 999
+            z-index: 999;
+        }
+
+        .lookme {
+            cursor: url(/img/eyecon.png), auto;
+            outline: 15px solid #ff3333;
+            outline-offset: -15px;
         }
     </style>
 </head>
@@ -64,60 +70,71 @@
                 audio: true
             });
             localVideo.srcObject = localStream;
-
+            
             const peer = new Peer({
                 key: window.__SKYWAY__,
                 debug: 3,
             });
-
+            
             let myId;
             peer.on('open', (id) => {
                 console.log(id);
                 myId = id;
             });
-
+            
             // ルームに入るための関数
             const joinRoom = () => {
                 const room = peer.joinRoom('room-name', {
                     mode: 'sfu',
                     stream: localStream,
                 });
-
+                
+                // 見てほしいイベントを追加
+                localVideo.addEventListener('mouseenter', () => {
+                    room.send({ type: 'lookme', target: myId});
+                    localVideo.classList.add('lookme');
+                });
+                localVideo.addEventListener('mouseleave', () => {
+                    room.send({ type: 'unlookme', target: myId});
+                    localVideo.classList.remove('lookme');
+                });
+                
                 room.on('open', () => {
                     console.log('ルームに入りました');
                 });
-
+                
                 room.on('peerJoin', peerId => {
                     console.log(peerId + 'が入室しました');
                 });
-
+                
                 room.on('stream', async stream => {
                     const remoteVideo = document.createElement('video');
                     remoteVideo.srcObject = stream;
                     remoteVideo.playsInline = true;
                     remoteVideo.setAttribute('data-peer-id', stream.peerId);
                     videoContainer.append(remoteVideo);
-
+                    
                     await remoteVideo.play().catch(console.error);
 
                     // 見るイベント追加
                     remoteVideo.addEventListener('mouseover', () => {
-                        // 見てる状態を解除
-                        room.send({ type: 'unlook' });
-                        // 新しく見てる人
                         room.send({ type: 'look', target: stream.peerId });
                     });
+                    // 見てる状態を解除
+                    remoteVideo.addEventListener('mouseleave', () => {
+                        room.send({ type: 'unlook' });
+                    });
                 });
-
+                
                 room.on('peerLeave', peerId => {
                     const remoteVideo = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
                     remoteVideo.srcObject.getTracks().forEach(track => {
                         track.stop();
                     });
-
+                    
                     remoteVideo.srcObject = null;
                     remoteVideo.remove();
-
+                    
                     console.log(peerId + 'が退出しました。')
                 });
 
@@ -137,6 +154,15 @@
                     eyecon.remove();
                 }
 
+                const assertion = peerId => {
+                    const target = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
+                    target.classList.add('lookme')
+                }
+                const unlookme = peerId => {
+                    const target = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
+                    target.classList.remove('lookme')
+                }
+
                 room.on('data', data => {
                     console.log(data);
                     console.log(data.data.type);
@@ -147,6 +173,10 @@
                         // 視線解除イベントが発火したとき
                         console.log(data.src)
                         unlook(data.src)
+                    } else if (data.data.type == 'lookme') {
+                        assertion(data.src);
+                    }else if (data.data.type == 'unlookme'){
+                        unlookme(data.src);
                     }
                 });
             }
@@ -165,7 +195,7 @@
                 stalker.style.transform = 'translate(' + e.clientX + 'px, ' + e.clientY + 'px)';
             });
         }
-        
+
         window.onload = () => {
             main();
             stalker();

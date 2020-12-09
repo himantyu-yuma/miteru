@@ -5,19 +5,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>miteru</title>
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
+        .m-card {
+            width: 80vw;
+            border-radius: 25px;
+            box-shadow: 3px 3px 20px gray;
+            margin-top: 10vh;
+            margin-right: auto;
+            margin-left: auto;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        #setting video {
+            width: 100%;
+            margin-left: 0;
+        }
+
         .video-wrapper {
             position: relative;
         }
 
+        video {
+            width: 30vw;
+            margin-left: 2vw;
+        }
+
         #eyecontainer {
             position: absolute;
-            left: 0;
-            bottom: 0;
+            left: 2rem;
+            bottom: 4rem;
         }
 
         .eyecon {
-            width: 10rem;
+            width: 8vw;
         }
 
         body {
@@ -41,28 +65,118 @@
             outline: 15px solid #ff3333;
             outline-offset: -15px;
         }
+
+        #name {
+            width: 10rem;
+        }
+
+        p {
+            margin-left: 2vw;
+            font-size: 2rem;
+            margin-top: 0;
+        }
     </style>
 </head>
 
 <body>
-    <img id="stalker" src="img/eyecon.png" alt="">
-    <div class="video-wrapper" id="local-video-wrapper">
-        <video id="local-video" autoplay muted="true"></video>
-        <!-- <img src="img/eyecon.png" class="eyecon"> -->
-        <div id="eyecontainer">
+    <div class="m-card" id="setting">
+        <div class="container">
+            <div class="row">
+                <div class="col-5">
+                    <video id="local-video" autoplay muted="true"></video>
+                </div>
+                <div class="col-7">
+                    <div class="form-group">
+                        <label for="name">名前</label>
+                        <input type="text" name="name" class="form-control" id="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">カメラ</label>
+                        <div class="btn-group" id="cam-toggle" role="group">
+                            <button class="btn btn-success" id="cam-on">
+                                ON
+                            </button>
+                            <button class="btn btn-outline-success" id="cam-off">
+                                OFF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">マイク</label>
+                        <div class="btn-group" id="mic-toggle" role="group">
+                            <button class="btn btn-success" id="mic-on">
+                                ON
+                            </button>
+                            <button class="btn btn-outline-success" id="mic-off">
+                                OFF
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="join-btn">入室</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="room" class="d-none">
+        <div id="local-video-wrapper" class="d-inline-block video-wrapper">
+            <!-- <video id="local-video" autoplay muted="true"></video> -->
+            <!-- <img src="img/eyecon.png" class="eyecon"> -->
+            <div id="eyecontainer">
+
+            </div>
+            <p id="local-name"></p>
+        </div>
+        <!-- <div class="form-group">
+                <label for="name">名前</label>
+                <input type="text" name="name" id="name" class="form-control">
+            </div> -->
+        <!-- <button id="join-btn" class="btn btn-primary">JOIN</button> -->
+        <div class="video-wrapper d-inline" id="video-container">
 
         </div>
     </div>
-    <div class="video-wrapper" id="video-container"></div>
+    <img id="stalker" src="img/eyecon.png" alt="">
 
-    <button id="join-btn">JOIN</button>
-
+    <!-- bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+    <!-- skyway -->
     <script src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
     <script src="js/key.js"></script>
     <script>
+        // 事前準備する画面（入室時消す）
+        const settingDiv = document.getElementById('setting');
+        const joinBtn = document.getElementById('join-btn');
+
+        const camOnBtn = document.getElementById('cam-on');
+        const camOffBtn = document.getElementById('cam-off');
+        const micOnBtn = document.getElementById('mic-on');
+        const micOffBtn = document.getElementById('mic-off');
+        // ボタンをトグルする処理
+        const toggleBtn = (btn1, btn2) => {
+            btn1.classList.add('btn-success');
+            btn1.classList.remove('btn-outline-success')
+            btn2.classList.add('btn-outline-success')
+            btn2.classList.remove('btn-success')
+        }
+
+        // 入室後表示するやつ
+        const roomDiv = document.getElementById('room');
+        // 自分のカメラを入れておくやつ
         const localVideo = document.getElementById('local-video');
+        // 参加者のカメラ入れておくdiv
         const videoContainer = document.getElementById('video-container');
+        // 見てるよマーク入れ
         const eyecontainer = document.getElementById('eyecontainer');
+
 
         const main = async () => {
             const localStream = await navigator.mediaDevices.getUserMedia({
@@ -70,50 +184,91 @@
                 audio: true
             });
             localVideo.srcObject = localStream;
-            
+
+            camOnBtn.addEventListener('click', () => {
+                toggleBtn(camOnBtn, camOffBtn);
+                localStream.getVideoTracks().forEach((track) => {
+                    track.enabled = true;
+                });
+            });
+            camOffBtn.addEventListener('click', () => {
+                toggleBtn(camOffBtn, camOnBtn);
+                localStream.getVideoTracks().forEach((track) => {
+                    track.enabled = false;
+                });
+            });
+            micOnBtn.addEventListener('click', () => {
+                toggleBtn(micOnBtn, micOffBtn);
+                localStream.getAudioTracks().forEach((track) => {
+                    track.enabled = true;
+                });
+            });
+            micOffBtn.addEventListener('click', () => {
+                toggleBtn(micOffBtn, micOnBtn);
+                localStream.getAudioTracks().forEach((track) => {
+                    track.enabled = false;
+                });
+            });
+
             const peer = new Peer({
                 key: window.__SKYWAY__,
                 debug: 3,
             });
-            
+
             let myId;
             peer.on('open', (id) => {
                 console.log(id);
                 myId = id;
             });
-            
+
             // ルームに入るための関数
             const joinRoom = () => {
                 const room = peer.joinRoom('room-name', {
                     mode: 'sfu',
                     stream: localStream,
                 });
-                
+                // 名前
+                const userName = document.getElementById('name').value;
+
                 // 見てほしいイベントを追加
                 localVideo.addEventListener('mouseenter', () => {
-                    room.send({ type: 'lookme', target: myId});
+                    room.send({ type: 'lookme', target: myId });
                     localVideo.classList.add('lookme');
                 });
                 localVideo.addEventListener('mouseleave', () => {
-                    room.send({ type: 'unlookme', target: myId});
+                    room.send({ type: 'unlookme', target: myId });
                     localVideo.classList.remove('lookme');
                 });
-                
+
                 room.on('open', () => {
                     console.log('ルームに入りました');
+                    room.send({ type: 'join', name: userName });
                 });
                 
                 room.on('peerJoin', peerId => {
                     console.log(peerId + 'が入室しました');
+                    room.send({ type: 'join', name: userName });
                 });
-                
+
                 room.on('stream', async stream => {
+                    const remoteVideoWrapper = document.createElement('div');
+                    remoteVideoWrapper.setAttribute('id', stream.peerId);
+                    remoteVideoWrapper.setAttribute('class', 'd-inline-block');
+
                     const remoteVideo = document.createElement('video');
                     remoteVideo.srcObject = stream;
                     remoteVideo.playsInline = true;
                     remoteVideo.setAttribute('data-peer-id', stream.peerId);
-                    videoContainer.append(remoteVideo);
-                    
+                    remoteVideoWrapper.append(remoteVideo);
+
+                    const remoteVideoName = document.createElement('p');
+                    remoteVideoName.textContent = window[stream.peerId];
+                    console.log(window[stream.peerId]);
+                    remoteVideoWrapper.append(remoteVideoName);
+
+                    // videoContainer.append(remoteVideo);
+                    videoContainer.append(remoteVideoWrapper);
+
                     await remoteVideo.play().catch(console.error);
 
                     // 見るイベント追加
@@ -125,16 +280,17 @@
                         room.send({ type: 'unlook' });
                     });
                 });
-                
+
                 room.on('peerLeave', peerId => {
                     const remoteVideo = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
                     remoteVideo.srcObject.getTracks().forEach(track => {
                         track.stop();
                     });
-                    
+
                     remoteVideo.srcObject = null;
-                    remoteVideo.remove();
-                    
+                    const remoteVideoWrapper = document.getElementById(peerId);
+                    remoteVideoWrapper.remove();
+
                     console.log(peerId + 'が退出しました。')
                 });
 
@@ -175,16 +331,31 @@
                         unlook(data.src)
                     } else if (data.data.type == 'lookme') {
                         assertion(data.src);
-                    }else if (data.data.type == 'unlookme'){
+                    } else if (data.data.type == 'unlookme') {
                         unlookme(data.src);
+                    } else if (data.data.type == 'join') {
+                        // 名前入れてく
+                        window[data.src] = data.data.name;
+                        console.log(data.data.name);
                     }
                 });
             }
 
-            document.getElementById('join-btn').addEventListener('click', () => {
+            // 入室処理
+            joinBtn.addEventListener('click', () => {
+                // 部屋に入る
                 joinRoom();
+                // 自分の映像を移動
+                document.getElementById('local-video-wrapper').insertBefore(localVideo, eyecontainer);
+                // 自分の名前を表示
+                document.getElementById('local-name').textContent = document.getElementById('name').value;
+                // ルームの画面表示
+                roomDiv.classList.remove('d-none');
+                // 事前準備のやつ消す
+                settingDiv.remove();
             });
         }
+
 
         const stalker = () => {
             //マウスストーカー用のdivを取得

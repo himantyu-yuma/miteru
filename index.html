@@ -5,116 +5,200 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>miteru</title>
-    <!-- bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
-        .m-card {
-            width: 80vw;
-            border-radius: 25px;
-            box-shadow: 3px 3px 20px gray;
-            margin-top: 10vh;
-            margin-right: auto;
-            margin-left: auto;
-            padding-top: 20px;
-            padding-bottom: 20px;
+        .video-wrapper {
+            position: relative;
         }
 
-        video {
-            width: 100%;
+        #eyecontainer {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+        }
+
+        .eyecon {
+            width: 10rem;
+        }
+
+        body {
+            cursor: url(/img/eyecon.png), auto;
+        }
+
+        #stalker {
+            pointer-events: none;
+            position: fixed;
+            top: -8px;
+            left: -8px;
+            width: 10rem;
+            transform: translate(0, 0);
+            transition: transform 0.2s;
+            transition-timing-function: ease-out;
+            z-index: 999;
+        }
+
+        .lookme {
+            cursor: url(/img/eyecon.png), auto;
+            outline: 15px solid #ff3333;
+            outline-offset: -15px;
         }
     </style>
 </head>
 
 <body>
-    <div class="m-card">
-        <div class="container">
-            <div class="row">
-                <div class="col-5">
-                    <video id="local-video" autoplay muted="true"></video>
-                </div>
-                <div class="col-7">
-                    <div class="form-group">
-                        <label for="name">名前</label>
-                        <input type="text" name="name" class="form-control" id="name">
-                    </div>
-                    <div class="form-group">
-                        <label for="name">カメラ</label>
-                        <div class="btn-group" id="cam-toggle" role="group">
-                            <button class="btn btn-success" id="cam-on">
-                                ON
-                            </button>
-                            <button class="btn btn-outline-success" id="cam-off">
-                                OFF
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="name">マイク</label>
-                        <div class="btn-group" id="mic-toggle" role="group">
-                            <button class="btn btn-success" id="mic-on">
-                                ON
-                            </button>
-                            <button class="btn btn-outline-success" id="mic-off">
-                                OFF
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <img id="stalker" src="img/eyecon.png" alt="">
+    <div class="video-wrapper" id="local-video-wrapper">
+        <video id="local-video" autoplay muted="true"></video>
+        <!-- <img src="img/eyecon.png" class="eyecon"> -->
+        <div id="eyecontainer">
+
         </div>
     </div>
-    <!-- bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
-        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
-        crossorigin="anonymous"></script>
-    <script>
-        const camOnBtn = document.getElementById('cam-on');
-        const camOffBtn = document.getElementById('cam-off');
-        const micOnBtn = document.getElementById('mic-on');
-        const micOffBtn = document.getElementById('mic-off');
-        const toggleBtn = (btn1, btn2) => {
-            btn1.classList.add('btn-success');
-            btn1.classList.remove('btn-outline-success')
-            btn2.classList.add('btn-outline-success')
-            btn2.classList.remove('btn-success')
-        }
+    <div class="video-wrapper" id="video-container"></div>
 
+    <button id="join-btn">JOIN</button>
+
+    <script src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
+    <script src="js/key.js"></script>
+    <script>
         const localVideo = document.getElementById('local-video');
+        const videoContainer = document.getElementById('video-container');
+        const eyecontainer = document.getElementById('eyecontainer');
+
         const main = async () => {
             const localStream = await navigator.mediaDevices.getUserMedia({
                 video: true,
                 audio: true
             });
             localVideo.srcObject = localStream;
+            
+            const peer = new Peer({
+                key: window.__SKYWAY__,
+                debug: 3,
+            });
+            
+            let myId;
+            peer.on('open', (id) => {
+                console.log(id);
+                myId = id;
+            });
+            
+            // ルームに入るための関数
+            const joinRoom = () => {
+                const room = peer.joinRoom('room-name', {
+                    mode: 'sfu',
+                    stream: localStream,
+                });
+                
+                // 見てほしいイベントを追加
+                localVideo.addEventListener('mouseenter', () => {
+                    room.send({ type: 'lookme', target: myId});
+                    localVideo.classList.add('lookme');
+                });
+                localVideo.addEventListener('mouseleave', () => {
+                    room.send({ type: 'unlookme', target: myId});
+                    localVideo.classList.remove('lookme');
+                });
+                
+                room.on('open', () => {
+                    console.log('ルームに入りました');
+                });
+                
+                room.on('peerJoin', peerId => {
+                    console.log(peerId + 'が入室しました');
+                });
+                
+                room.on('stream', async stream => {
+                    const remoteVideo = document.createElement('video');
+                    remoteVideo.srcObject = stream;
+                    remoteVideo.playsInline = true;
+                    remoteVideo.setAttribute('data-peer-id', stream.peerId);
+                    videoContainer.append(remoteVideo);
+                    
+                    await remoteVideo.play().catch(console.error);
 
-            camOnBtn.addEventListener('click', () => {
-                toggleBtn(camOnBtn, camOffBtn);
-                localStream.getVideoTracks().forEach((track) => {
-                    track.enabled = true;
+                    // 見るイベント追加
+                    remoteVideo.addEventListener('mouseover', () => {
+                        room.send({ type: 'look', target: stream.peerId });
+                    });
+                    // 見てる状態を解除
+                    remoteVideo.addEventListener('mouseleave', () => {
+                        room.send({ type: 'unlook' });
+                    });
                 });
-            });
-            camOffBtn.addEventListener('click', () => {
-                toggleBtn(camOffBtn, camOnBtn);
-                localStream.getVideoTracks().forEach((track) => {
-                    track.enabled = false;
+                
+                room.on('peerLeave', peerId => {
+                    const remoteVideo = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
+                    remoteVideo.srcObject.getTracks().forEach(track => {
+                        track.stop();
+                    });
+                    
+                    remoteVideo.srcObject = null;
+                    remoteVideo.remove();
+                    
+                    console.log(peerId + 'が退出しました。')
                 });
-            });
-            micOnBtn.addEventListener('click', () => {
-                toggleBtn(micOnBtn, micOffBtn);
-            });
-            micOffBtn.addEventListener('click', () => {
-                toggleBtn(micOffBtn, micOnBtn);
+
+                const beLook = peerId => {
+                    // 見られたとき
+                    const eyecon = document.createElement('img');
+                    eyecon.src = 'img/eyecon.png';
+                    eyecon.classList.add('eyecon');
+                    eyecon.setAttribute('data-peer-id', peerId);
+
+                    document.getElementById('eyecontainer').append(eyecon);
+                }
+
+                const unlook = peerId => {
+                    // 視線解除されたとき
+                    const eyecon = eyecontainer.querySelector(`[data-peer-id="${peerId}"]`);
+                    eyecon.remove();
+                }
+
+                const assertion = peerId => {
+                    const target = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
+                    target.classList.add('lookme')
+                }
+                const unlookme = peerId => {
+                    const target = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
+                    target.classList.remove('lookme')
+                }
+
+                room.on('data', data => {
+                    console.log(data);
+                    console.log(data.data.type);
+                    if (data.data.type == 'look' && data.data.target == myId) {
+                        // 見られたイベントが発火したとき
+                        beLook(data.src);
+                    } else if (data.data.type == 'unlook') {
+                        // 視線解除イベントが発火したとき
+                        console.log(data.src)
+                        unlook(data.src)
+                    } else if (data.data.type == 'lookme') {
+                        assertion(data.src);
+                    }else if (data.data.type == 'unlookme'){
+                        unlookme(data.src);
+                    }
+                });
+            }
+
+            document.getElementById('join-btn').addEventListener('click', () => {
+                joinRoom();
             });
         }
+
+        const stalker = () => {
+            //マウスストーカー用のdivを取得
+            const stalker = document.getElementById('stalker');
+
+            //上記のdivタグをマウスに追従させる処理
+            document.addEventListener('mousemove', function (e) {
+                stalker.style.transform = 'translate(' + e.clientX + 'px, ' + e.clientY + 'px)';
+            });
+        }
+
         window.onload = () => {
             main();
+            stalker();
         }
     </script>
 </body>

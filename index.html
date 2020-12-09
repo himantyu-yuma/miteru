@@ -90,7 +90,7 @@
                         <label for="name">名前</label>
                         <input type="text" name="name" class="form-control" id="name">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="device-btns">
                         <label for="name">カメラ</label>
                         <div class="btn-group" id="cam-toggle" role="group">
                             <button class="btn btn-success" id="cam-on">
@@ -100,9 +100,7 @@
                                 OFF
                             </button>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="name">マイク</label>
+                        <label for="name" class="ml-5">マイク</label>
                         <div class="btn-group" id="mic-toggle" role="group">
                             <button class="btn btn-success" id="mic-on">
                                 ON
@@ -244,7 +242,7 @@
                     console.log('ルームに入りました');
                     room.send({ type: 'join', name: userName });
                 });
-                
+
                 room.on('peerJoin', peerId => {
                     console.log(peerId + 'が入室しました');
                     room.send({ type: 'join', name: userName });
@@ -343,12 +341,21 @@
 
             // 入室処理
             joinBtn.addEventListener('click', () => {
+                // 名前空欄だったらエラー
+                if (document.getElementById('name').value.replace(/\s/g, '') == '') {
+                    alert('名前を入力して下さい');
+                    return;
+                }
                 // 部屋に入る
                 joinRoom();
                 // 自分の映像を移動
-                document.getElementById('local-video-wrapper').insertBefore(localVideo, eyecontainer);
+                const localWrapper = document.getElementById('local-video-wrapper');
+                localWrapper.insertBefore(localVideo, eyecontainer);
                 // 自分の名前を表示
                 document.getElementById('local-name').textContent = document.getElementById('name').value;
+                // ボタン移動
+                const deviceBtns = document.getElementById('device-btns');
+                document.getElementById('room').insertBefore(deviceBtns, localWrapper);
                 // ルームの画面表示
                 roomDiv.classList.remove('d-none');
                 // 事前準備のやつ消す

@@ -70,50 +70,50 @@
                 audio: true
             });
             localVideo.srcObject = localStream;
-            
+
             const peer = new Peer({
                 key: window.__SKYWAY__,
                 debug: 3,
             });
-            
+
             let myId;
             peer.on('open', (id) => {
                 console.log(id);
                 myId = id;
             });
-            
+
             // ルームに入るための関数
             const joinRoom = () => {
                 const room = peer.joinRoom('room-name', {
                     mode: 'sfu',
                     stream: localStream,
                 });
-                
+
                 // 見てほしいイベントを追加
                 localVideo.addEventListener('mouseenter', () => {
-                    room.send({ type: 'lookme', target: myId});
+                    room.send({ type: 'lookme', target: myId });
                     localVideo.classList.add('lookme');
                 });
                 localVideo.addEventListener('mouseleave', () => {
-                    room.send({ type: 'unlookme', target: myId});
+                    room.send({ type: 'unlookme', target: myId });
                     localVideo.classList.remove('lookme');
                 });
-                
+
                 room.on('open', () => {
                     console.log('ルームに入りました');
                 });
-                
+
                 room.on('peerJoin', peerId => {
                     console.log(peerId + 'が入室しました');
                 });
-                
+
                 room.on('stream', async stream => {
                     const remoteVideo = document.createElement('video');
                     remoteVideo.srcObject = stream;
                     remoteVideo.playsInline = true;
                     remoteVideo.setAttribute('data-peer-id', stream.peerId);
                     videoContainer.append(remoteVideo);
-                    
+
                     await remoteVideo.play().catch(console.error);
 
                     // 見るイベント追加
@@ -125,16 +125,16 @@
                         room.send({ type: 'unlook' });
                     });
                 });
-                
+
                 room.on('peerLeave', peerId => {
                     const remoteVideo = videoContainer.querySelector(`[data-peer-id="${peerId}"]`);
                     remoteVideo.srcObject.getTracks().forEach(track => {
                         track.stop();
                     });
-                    
+
                     remoteVideo.srcObject = null;
                     remoteVideo.remove();
-                    
+
                     console.log(peerId + 'が退出しました。')
                 });
 
@@ -175,7 +175,7 @@
                         unlook(data.src)
                     } else if (data.data.type == 'lookme') {
                         assertion(data.src);
-                    }else if (data.data.type == 'unlookme'){
+                    } else if (data.data.type == 'unlookme') {
                         unlookme(data.src);
                     }
                 });

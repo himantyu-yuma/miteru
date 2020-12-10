@@ -179,8 +179,8 @@
         const main = async () => {
             const localStream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    width: { ideal: 1024 },
-                    height: { ideal: 768 }
+                    width: { ideal: 1024, max: 1024},
+                    height: { ideal: 768, max: 768 }
                 },
                 audio: true
             });

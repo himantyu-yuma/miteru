@@ -45,10 +45,6 @@
             width: 8vw;
         }
 
-        body {
-            cursor: url(/img/eyecon.png), auto;
-        }
-
         #stalker {
             pointer-events: none;
             position: fixed;
@@ -62,7 +58,6 @@
         }
 
         .lookme {
-            cursor: url(/img/eyecon.png), auto;
             outline: 15px solid #ff3333;
             outline-offset: -15px;
         }
@@ -277,10 +272,14 @@
                 localVideo.addEventListener('mouseenter', () => {
                     room.send({ type: 'lookme', target: myId });
                     localVideo.classList.add('lookme');
+                    // 自分が見てほしいときログ
+                    collectLog(window[myId], window[myId]);
                 });
                 localVideo.addEventListener('mouseleave', () => {
                     room.send({ type: 'unlookme', target: myId });
                     localVideo.classList.remove('lookme');
+                    // 自分が見てほしくなくなったときログ
+                    collectLog(window[myId], 'none');
                 });
 
                 room.on('open', () => {
@@ -383,8 +382,12 @@
                         // 視線解除イベントが発火したとき
                         unlook(data.src)
                     } else if (data.data.type == 'lookme') {
+                        // 見てほしいときログ
+                        collectLog(window[data.src], window[data.src]);
                         assertion(data.src);
                     } else if (data.data.type == 'unlookme') {
+                        // 見てほしくなくなったときログ
+                        collectLog(window[data.src], 'none');
                         unlookme(data.src);
                     } else if (data.data.type == 'join') {
                         // 名前入れてく

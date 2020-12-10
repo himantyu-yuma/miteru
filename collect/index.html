@@ -134,7 +134,7 @@
 
         </div>
     </div>
-    <img id="stalker" src="img/eyecon.png" alt="">
+    <img id="stalker" src="../img/eyecon.png" alt="">
 
     <!-- bootstrap -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -148,8 +148,49 @@
         crossorigin="anonymous"></script>
     <!-- skyway -->
     <script src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
-    <script src="js/key.js"></script>
+    <script src="../js/key.js"></script>
     <script>
+        // nodeに送りつけるログ（json）
+        let log = {};
+        // 一旦格納しておく配列
+        let logArr = [];
+
+        const collectLog = (from, to) => {
+            // 誰かが誰かを見たり、見なかったりしたらログとして集める
+            // 視線を外したときは、toをnoneに
+            // TODO: 自分の見たログも入れる？それとも、これはログ集積用にして別途入室させる？
+            const log = {
+                time: new Date(),
+                from: from,
+                to: to
+            }
+            // const strJSON = JSON.stringify(log, null, '\t')
+            // logArr.push(strJSON);
+            logArr.push(log);
+        }
+
+        const sendData = data => {
+            const XHR = new XMLHttpRequest();
+            // データが正常に送信された場合に行うことを定義します
+            XHR.addEventListener('load', function (event) {
+                console.log('データ送信に成功')
+            });
+
+            // エラーが発生した場合に行うことを定義します
+            XHR.addEventListener('error', function (event) {
+                alert('データ送信失敗');
+            });
+
+            // リクエストをセットアップします
+            XHR.open('POST', 'http://localhost:3000/api/');
+
+            // フォームデータの POST リクエストを扱うために必要な HTTP ヘッダを追加します
+            XHR.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            // 最後に、データを送信します
+            XHR.send(data);
+        }
+
         // 事前準備する画面（入室時消す）
         const settingDiv = document.getElementById('setting');
         const joinBtn = document.getElementById('join-btn');
@@ -275,10 +316,14 @@
                     // 見るイベント追加
                     remoteVideo.addEventListener('mouseover', () => {
                         room.send({ type: 'look', target: stream.peerId });
+                        // 自分が見たログ
+                        collectLog(window[myId], window[stream.peerId]);
                     });
                     // 見てる状態を解除
                     remoteVideo.addEventListener('mouseleave', () => {
                         room.send({ type: 'unlook' });
+                        // 自分が視線外したログ
+                        collectLog(window[myId], 'none');
                     });
                 });
 
@@ -298,7 +343,7 @@
                 const beLook = peerId => {
                     // 見られたとき
                     const eyecon = document.createElement('img');
-                    eyecon.src = 'img/eyecon.png';
+                    eyecon.src = '../img/eyecon.png';
                     eyecon.classList.add('eyecon');
                     eyecon.setAttribute('data-peer-id', peerId);
 
@@ -321,6 +366,15 @@
                 }
 
                 room.on('data', data => {
+
+                    if (data.data.type == 'look') {
+                        // 見たときログ
+                        collectLog(window[data.src], window[data.data.target]);
+                    }
+                    if (data.data.type == 'unlook') {
+                        // 視線外したときログ
+                        collectLog(window[data.src], 'none');
+                    }
                     if (data.data.type == 'look' && data.data.target == myId) {
                         // 見られたイベントが発火したとき
                         beLook(data.src);
@@ -345,6 +399,9 @@
                     alert('名前を入力して下さい');
                     return;
                 }
+                const userName = document.getElementById('name').value;
+                // グローバル空間にpeerIdと名前を入れる
+                window[myId] = userName;
                 // 部屋に入る
                 joinRoom();
                 // 自分の映像を移動
@@ -361,6 +418,13 @@
                 roomDiv.classList.remove('d-none');
                 // 事前準備のやつ消す
                 settingDiv.remove();
+
+                // ログを一定時間で送信
+                setInterval(() => {
+                    sendData(`data=${JSON.stringify(logArr, null, "\t")}`);
+                    // ログリセット
+                    logArr = [];
+                }, 10000);
             });
         }
 
@@ -378,6 +442,7 @@
         window.onload = () => {
             main();
             stalker();
+
         }
     </script>
 </body>

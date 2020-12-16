@@ -35,7 +35,7 @@
             margin-left: 2vw;
         }
 
-        #eyecontainer {
+        .eyecontainer {
             position: absolute;
             left: 2rem;
             bottom: 4rem;
@@ -116,7 +116,7 @@
         <div id="local-video-wrapper" class="d-inline-block video-wrapper">
             <!-- <video id="local-video" autoplay muted="true"></video> -->
             <!-- <img src="img/eyecon.png" class="eyecon"> -->
-            <div id="eyecontainer">
+            <div class="eyecontainer">
 
             </div>
             <p id="local-name"></p>
@@ -169,7 +169,7 @@
         // 参加者のカメラ入れておくdiv
         const videoContainer = document.getElementById('video-container');
         // 見てるよマーク入れ
-        const eyecontainer = document.getElementById('eyecontainer');
+        const myEyecontainer = document.querySelector('#local-video-wrapper .eyecontainer');
 
 
         const main = async () => {
@@ -216,6 +216,7 @@
             peer.on('open', (id) => {
                 console.log(id);
                 myId = id;
+                document.getElementById('local-video-wrapper').setAttribute('wrapper-id', id);
             });
 
             // ルームに入るための関数
@@ -247,17 +248,24 @@
                     room.send({ type: 'join', name: userName });
                 });
 
+                // 誰かのstreamを受信したとき
                 room.on('stream', async stream => {
+                    // videoを入れるハコを作る
                     const remoteVideoWrapper = document.createElement('div');
                     remoteVideoWrapper.setAttribute('id', stream.peerId);
                     remoteVideoWrapper.setAttribute('class', 'd-inline-block');
-
+                    remoteVideoWrapper.setAttribute('wrapper-id', stream.peerId); // add
+                    // video入れる
                     const remoteVideo = document.createElement('video');
                     remoteVideo.srcObject = stream;
                     remoteVideo.playsInline = true;
                     remoteVideo.setAttribute('data-peer-id', stream.peerId);
                     remoteVideoWrapper.append(remoteVideo);
-
+                    // eyecontainer入れる
+                    const remoteEyecontainer = document.createElement('div');
+                    remoteEyecontainer.setAttribute('class', 'eyecontainer');
+                    remoteVideoWrapper.append(remoteEyecontainer);
+                    // 名前入れる
                     const remoteVideoName = document.createElement('p');
                     remoteVideoName.textContent = window[stream.peerId];
                     console.log(window[stream.peerId]);
@@ -274,7 +282,8 @@
                     });
                     // 見てる状態を解除
                     remoteVideo.addEventListener('mouseleave', () => {
-                        room.send({ type: 'unlook' });
+                        // room.send({ type: 'unlook' });
+                        room.send({ type: 'unlook', target: stream.peerId });
                     });
                 });
 
@@ -291,19 +300,33 @@
                     console.log(peerId + 'が退出しました。')
                 });
 
-                const beLook = peerId => {
+                // const beLook = peerId => {
+                //     // 見られたとき
+                //     const eyecon = document.createElement('img');
+                //     eyecon.src = 'img/eyecon.png';
+                //     eyecon.classList.add('eyecon');
+                //     eyecon.setAttribute('data-peer-id', peerId);
+
+                //     document.querySelector('#local-video-wrapper .eyecontainer').append(eyecon);
+                // }
+                const beLook = targetPeerId => {
                     // 見られたとき
                     const eyecon = document.createElement('img');
                     eyecon.src = 'img/eyecon.png';
                     eyecon.classList.add('eyecon');
-                    eyecon.setAttribute('data-peer-id', peerId);
+                    // eyecon.setAttribute('data-peer-id', peerId);
 
-                    document.getElementById('eyecontainer').append(eyecon);
+                    document.querySelector(`div[wrapper-id="${targetPeerId}"] div.eyecontainer`).append(eyecon);
                 }
 
+                // const unlook = peerId => {
+                //     // 視線解除されたとき
+                //     const eyecon = myEyecontainer.querySelector(`[data-peer-id="${peerId}"]`);
+                //     eyecon.remove();
+                // }
                 const unlook = peerId => {
                     // 視線解除されたとき
-                    const eyecon = eyecontainer.querySelector(`[data-peer-id="${peerId}"]`);
+                    const eyecon = document.querySelector(`[wrapper-id="${peerId}"] .eyecon`);
                     eyecon.remove();
                 }
 
@@ -317,12 +340,15 @@
                 }
 
                 room.on('data', data => {
-                    if (data.data.type == 'look' && data.data.target == myId) {
+                    // if (data.data.type == 'look' && data.data.target == myId) {
+                    if (data.data.type == 'look') {
                         // 見られたイベントが発火したとき
-                        beLook(data.src);
+                        beLook(data.data.target);
+                        // beLook(data.src);
                     } else if (data.data.type == 'unlook') {
                         // 視線解除イベントが発火したとき
-                        unlook(data.src)
+                        // unlook(data.src)
+                        unlook(data.data.target);
                     } else if (data.data.type == 'lookme') {
                         assertion(data.src);
                     } else if (data.data.type == 'unlookme') {
@@ -345,7 +371,7 @@
                 joinRoom();
                 // 自分の映像を移動
                 const localWrapper = document.getElementById('local-video-wrapper');
-                localWrapper.insertBefore(localVideo, eyecontainer);
+                localWrapper.insertBefore(localVideo, myEyecontainer);
                 // 自分の名前を表示
                 document.getElementById('local-name').textContent = document.getElementById('name').value;
                 // ボタン移動

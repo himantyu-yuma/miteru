@@ -261,6 +261,8 @@
                     remoteVideo.playsInline = true;
                     remoteVideo.setAttribute('data-peer-id', stream.peerId);
                     remoteVideoWrapper.append(remoteVideo);
+                    remoteVideo.volume = 0.5;
+
                     // eyecontainer入れる
                     const remoteEyecontainer = document.createElement('div');
                     remoteEyecontainer.setAttribute('class', 'eyecontainer');
@@ -279,11 +281,13 @@
                     // 見るイベント追加
                     remoteVideo.addEventListener('mouseover', () => {
                         room.send({ type: 'look', target: stream.peerId });
+                        remoteVideo.volume = 1;
                     });
                     // 見てる状態を解除
                     remoteVideo.addEventListener('mouseleave', () => {
                         // room.send({ type: 'unlook' });
                         room.send({ type: 'unlook', target: stream.peerId });
+                        remoteVideo.volume = 0.5;
                     });
                 });
 

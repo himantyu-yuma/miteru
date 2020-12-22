@@ -228,15 +228,15 @@
                 // 名前
                 const userName = document.getElementById('name').value;
 
-                // 見てほしいイベントを追加
-                localVideo.addEventListener('mouseenter', () => {
-                    room.send({ type: 'lookme', target: myId });
-                    localVideo.classList.add('lookme');
-                });
-                localVideo.addEventListener('mouseleave', () => {
-                    room.send({ type: 'unlookme', target: myId });
-                    localVideo.classList.remove('lookme');
-                });
+                // // 見てほしいイベントを追加
+                // localVideo.addEventListener('mouseenter', () => {
+                //     room.send({ type: 'lookme', target: myId });
+                //     localVideo.classList.add('lookme');
+                // });
+                // localVideo.addEventListener('mouseleave', () => {
+                //     room.send({ type: 'unlookme', target: myId });
+                //     localVideo.classList.remove('lookme');
+                // });
 
                 room.on('open', () => {
                     console.log('ルームに入りました');
@@ -340,12 +340,13 @@
                 }
 
                 room.on('data', data => {
-                    // if (data.data.type == 'look' && data.data.target == myId) {
-                    if (data.data.type == 'look') {
+                    if (data.data.type == 'look' && data.data.target == myId) {
+                    // if (data.data.type == 'look') {
                         // 見られたイベントが発火したとき
                         beLook(data.data.target);
                         // beLook(data.src);
-                    } else if (data.data.type == 'unlook') {
+                    // } else if (data.data.type == 'unlook') {
+                    } else if (data.data.type == 'unlook' && data.data.target == myId) {
                         // 視線解除イベントが発火したとき
                         // unlook(data.src)
                         unlook(data.data.target);

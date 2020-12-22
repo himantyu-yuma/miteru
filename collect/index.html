@@ -334,7 +334,7 @@
                     remoteVideo.addEventListener('mouseleave', () => {
                         // room.send({ type: 'unlook' });
                         room.send({ type: 'unlook', target: stream.peerId });
-                        remoteVideo.volume = 0.5;
+                        remoteVideo.volume = 0.3;
                         // 自分が視線外したログ
                         collectLog(window[myId], 'none');
                     });

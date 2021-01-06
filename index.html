@@ -33,6 +33,7 @@
             width: 30vw;
             height: 22.5vw;
             margin-left: 2vw;
+            -webkit-transform: scaleX(-1);
         }
 
         .eyecontainer {
@@ -121,20 +122,23 @@
     </div>
 
     <div id="room" class="d-none">
-        <div id="local-video-wrapper" class="d-inline-block video-wrapper">
-            <!-- <video id="local-video" autoplay muted="true"></video> -->
-            <!-- <img src="img/eyecon.png" class="eyecon"> -->
-            <div class="eyecontainer">
+        <div id="device-switch" class="text-center">
 
-            </div>
-            <p id="local-name"></p>
         </div>
         <!-- <div class="form-group">
-                <label for="name">名前</label>
-                <input type="text" name="name" id="name" class="form-control">
-            </div> -->
+            <label for="name">名前</label>
+            <input type="text" name="name" id="name" class="form-control">
+        </div> -->
         <!-- <button id="join-btn" class="btn btn-primary">JOIN</button> -->
         <div class="video-wrapper d-inline" id="video-container">
+            <div id="local-video-wrapper" class="d-inline-block video-wrapper">
+                <!-- <video id="local-video" autoplay muted="true"></video> -->
+                <!-- <img src="img/eyecon.png" class="eyecon"> -->
+                <div class="eyecontainer">
+
+                </div>
+                <p id="local-name"></p>
+            </div>
 
         </div>
     </div>
@@ -172,6 +176,8 @@
 
         // 入室後表示するやつ
         const roomDiv = document.getElementById('room');
+        // 自分の映像とか入れておくやつ
+        const localWrapper = document.getElementById('local-video-wrapper');
         // 自分のカメラを入れておくやつ
         const localVideo = document.getElementById('local-video');
         // 参加者のカメラ入れておくdiv
@@ -224,7 +230,7 @@
             peer.on('open', (id) => {
                 console.log(id);
                 myId = id;
-                document.getElementById('local-video-wrapper').setAttribute('wrapper-id', id);
+                localWrapper.setAttribute('wrapper-id', id);
             });
 
             // ルームに入るための関数
@@ -254,15 +260,28 @@
                 room.on('peerJoin', peerId => {
                     console.log(peerId + 'が入室しました');
                     room.send({ type: 'join', name: userName });
+
+                    // videoを入れるハコを作る（後から入ってきたパターン）
+                    const remoteVideoWrapper = document.createElement('div');
+                    remoteVideoWrapper.setAttribute('id', peerId);
+                    remoteVideoWrapper.setAttribute('class', 'd-inline-block');
+                    remoteVideoWrapper.setAttribute('wrapper-id', peerId);
+                    // 最後に追加する
+                    videoContainer.append(remoteVideoWrapper);
                 });
 
                 // 誰かのstreamを受信したとき
                 room.on('stream', async stream => {
-                    // videoを入れるハコを作る
-                    const remoteVideoWrapper = document.createElement('div');
-                    remoteVideoWrapper.setAttribute('id', stream.peerId);
-                    remoteVideoWrapper.setAttribute('class', 'd-inline-block');
-                    remoteVideoWrapper.setAttribute('wrapper-id', stream.peerId); // add
+                    // ハコが既にあるかどうか
+                    if (document.getElementById(stream.peerId) == null) {
+                        // 無かったら自分より前に追加
+                        const tempWrapper = document.createElement('div');
+                        tempWrapper.setAttribute('id', stream.peerId);
+                        tempWrapper.setAttribute('class', 'd-inline-block');
+                        tempWrapper.setAttribute('wrapper-id', stream.peerId);
+                        videoContainer.insertBefore(tempWrapper, localWrapper);
+                    }
+                    const remoteVideoWrapper = document.getElementById(stream.peerId);
                     // video入れる
                     const remoteVideo = document.createElement('video');
                     remoteVideo.srcObject = stream;
@@ -282,7 +301,7 @@
                     remoteVideoWrapper.append(remoteVideoName);
 
                     // videoContainer.append(remoteVideo);
-                    videoContainer.append(remoteVideoWrapper);
+                    // videoContainer.append(remoteVideoWrapper);
 
                     await remoteVideo.play().catch(console.error);
 
@@ -359,11 +378,11 @@
 
                 room.on('data', data => {
                     if (data.data.type == 'look' && data.data.target == myId) {
-                    // if (data.data.type == 'look') {
+                        // if (data.data.type == 'look') {
                         // 見られたイベントが発火したとき
                         beLook(data.data.target);
                         // beLook(data.src);
-                    // } else if (data.data.type == 'unlook') {
+                        // } else if (data.data.type == 'unlook') {
                     } else if (data.data.type == 'unlook' && data.data.target == myId) {
                         // 視線解除イベントが発火したとき
                         // unlook(data.src)
@@ -389,13 +408,13 @@
                 // 部屋に入る
                 joinRoom();
                 // 自分の映像を移動
-                const localWrapper = document.getElementById('local-video-wrapper');
                 localWrapper.insertBefore(localVideo, myEyecontainer);
                 // 自分の名前を表示
                 document.getElementById('local-name').textContent = document.getElementById('name').value;
                 // ボタン移動
                 const deviceBtns = document.getElementById('device-btns');
-                document.getElementById('room').insertBefore(deviceBtns, localWrapper);
+                // document.getElementById('room').insertBefore(deviceBtns, localWrapper);
+                document.getElementById('device-switch').append(deviceBtns);
                 deviceBtns.classList.add('mt-3')
                 deviceBtns.style.marginLeft = '2vw'
                 // ルームの画面表示

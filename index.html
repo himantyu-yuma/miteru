@@ -62,6 +62,14 @@
             outline-offset: -15px;
         }
 
+        .look {
+            --outline-width: 10px;
+            outline: var(--outline-width) solid #32ff2b;
+            outline-offset: calc(-1*var(--outline-width));
+            /* outline: 10px solid #32ff2b; */
+            /* outline-offset: -10px; */
+        }
+
         #name {
             width: 10rem;
         }
@@ -282,12 +290,18 @@
                     remoteVideo.addEventListener('mouseover', () => {
                         room.send({ type: 'look', target: stream.peerId });
                         remoteVideo.volume = 1;
+
+                        // 枠付ける
+                        remoteVideo.classList.add("look");
                     });
                     // 見てる状態を解除
                     remoteVideo.addEventListener('mouseleave', () => {
                         // room.send({ type: 'unlook' });
                         room.send({ type: 'unlook', target: stream.peerId });
                         remoteVideo.volume = 0.3;
+
+                        // 枠外す
+                        remoteVideo.classList.remove("look");
                     });
                 });
 

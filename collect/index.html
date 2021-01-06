@@ -8,70 +8,79 @@
     <!-- bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <style>
-            .m-card {
-                width: 80vw;
-                border-radius: 25px;
-                box-shadow: 3px 3px 20px gray;
-                margin-top: 10vh;
-                margin-right: auto;
-                margin-left: auto;
-                padding-top: 20px;
-                padding-bottom: 20px;
-            }
-    
-            #setting video {
-                width: 100%;
-                margin-left: 0;
-            }
-    
-            .video-wrapper {
-                position: relative;
-            }
-    
-            video {
-                width: 30vw;
-                height: 22.5vw;
-                margin-left: 2vw;
-            }
-    
-            .eyecontainer {
-                position: absolute;
-                left: 2rem;
-                bottom: 4rem;
-            }
-    
-            .eyecon {
-                width: 8vw;
-            }
-    
-            #stalker {
-                pointer-events: none;
-                position: fixed;
-                top: -8px;
-                left: -8px;
-                width: 10rem;
-                transform: translate(0, 0);
-                transition: transform 0.2s;
-                transition-timing-function: ease-out;
-                z-index: 999;
-            }
-    
-            .lookme {
-                outline: 15px solid #ff3333;
-                outline-offset: -15px;
-            }
-    
-            #name {
-                width: 10rem;
-            }
-    
-            p {
-                margin-left: 2vw;
-                font-size: 1.5rem;
-                margin-top: 0;
-            }
-        </style>
+    <style>
+        .m-card {
+            width: 80vw;
+            border-radius: 25px;
+            box-shadow: 3px 3px 20px gray;
+            margin-top: 10vh;
+            margin-right: auto;
+            margin-left: auto;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        #setting video {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .video-wrapper {
+            position: relative;
+        }
+
+        video {
+            width: 30vw;
+            height: 22.5vw;
+            margin-left: 2vw;
+            -webkit-transform: scaleX(-1);
+        }
+
+        .eyecontainer {
+            position: absolute;
+            left: 2rem;
+            bottom: 4rem;
+        }
+
+        .eyecon {
+            width: 8vw;
+        }
+
+        #stalker {
+            pointer-events: none;
+            position: fixed;
+            top: -8px;
+            left: -8px;
+            width: 10rem;
+            transform: translate(0, 0);
+            transition: transform 0.2s;
+            transition-timing-function: ease-out;
+            z-index: 999;
+        }
+
+        .lookme {
+            outline: 15px solid #ff3333;
+            outline-offset: -15px;
+        }
+
+        .look {
+            --outline-width: 10px;
+            outline: var(--outline-width) solid #32ff2b;
+            outline-offset: calc(-1*var(--outline-width));
+            /* outline: 10px solid #32ff2b; */
+            /* outline-offset: -10px; */
+        }
+
+        #name {
+            width: 10rem;
+        }
+
+        p {
+            margin-left: 2vw;
+            font-size: 1.5rem;
+            margin-top: 0;
+        }
+    </style>
 </head>
 
 <body>
@@ -327,6 +336,9 @@
                     remoteVideo.addEventListener('mouseover', () => {
                         room.send({ type: 'look', target: stream.peerId });
                         remoteVideo.volume = 1;
+
+                        // 枠付ける
+                        remoteVideo.classList.add("look");
                         // 自分が見たログ
                         collectLog(window[myId], window[stream.peerId]);
                     });
@@ -335,6 +347,9 @@
                         // room.send({ type: 'unlook' });
                         room.send({ type: 'unlook', target: stream.peerId });
                         remoteVideo.volume = 0.3;
+
+                        // 枠外す
+                        remoteVideo.classList.remove("look");
                         // 自分が視線外したログ
                         collectLog(window[myId], 'none');
                     });

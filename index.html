@@ -29,10 +29,15 @@
             position: relative;
         }
 
+        /* 円状に配置するとき */
+        /* #video-container>div{
+            position: absolute;
+        } */
+
         video {
-            width: 30vw;
-            height: 22.5vw;
-            margin-left: 2vw;
+            width: 24vw;
+            height: 18vw;
+            margin: 0 2vw;
             -webkit-transform: scaleX(-1);
         }
 
@@ -79,6 +84,10 @@
             margin-left: 2vw;
             font-size: 1.5rem;
             margin-top: 0;
+        }
+
+        #room{
+            /* padding: 0 15vw; */
         }
     </style>
 </head>
@@ -130,8 +139,8 @@
             <input type="text" name="name" id="name" class="form-control">
         </div> -->
         <!-- <button id="join-btn" class="btn btn-primary">JOIN</button> -->
-        <div class="video-wrapper d-inline" id="video-container">
-            <div id="local-video-wrapper" class="d-inline-block video-wrapper">
+        <div class="video-wrapper" id="video-container">
+            <div id="local-video-wrapper" class="d-inline-block">
                 <!-- <video id="local-video" autoplay muted="true"></video> -->
                 <!-- <img src="img/eyecon.png" class="eyecon"> -->
                 <div class="eyecontainer">
@@ -184,7 +193,21 @@
         const videoContainer = document.getElementById('video-container');
         // 見てるよマーク入れ
         const myEyecontainer = document.querySelector('#local-video-wrapper .eyecontainer');
+        
+        const getPosition = (total,order) => {
+            // 半径
+            const radius = 20;
+            // 中心
+            const center = [50,-12];
 
+            // 角度（弧度法）
+            // const theta = (360/total)/180 * order;
+            const theta = Math.PI/180 * (360/total * order);
+            const x = Math.sin(theta) * radius + center[0];
+            const y = Math.cos(theta) * radius + center[1];
+            // 配列で位置を返す
+            return [x, y];
+        }
 
         const main = async () => {
             const localStream = await navigator.mediaDevices.getUserMedia({
@@ -322,6 +345,17 @@
                         // 枠外す
                         remoteVideo.classList.remove("look");
                     });
+
+                    // // 円状に配置してみる
+                    // const allParticipant = document.querySelectorAll('#video-container>div');
+                    // const videoW = 24;
+                    // const videoH = 18;
+                    // console.log(allParticipant.length);
+                    // allParticipant.forEach((value, index) => {
+                    //     const basePos = getPosition(allParticipant.length, index);
+                    //     const pos = [basePos[0], basePos[1]];
+                    //     value.style.transform = `translate(${pos[0]-videoW/2}vw, ${-(pos[1]-videoH/2)}vw)`;
+                    // });
                 });
 
                 room.on('peerLeave', peerId => {

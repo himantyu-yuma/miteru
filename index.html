@@ -25,7 +25,7 @@
             margin-left: 0;
         }
 
-        .video-wrapper {
+        #local-video-wrapper {
             position: relative;
         }
 
@@ -86,8 +86,8 @@
             margin-top: 0;
         }
 
-        #room{
-            /* padding: 0 15vw; */
+        #room {
+            padding: 0 10vw;
         }
     </style>
 </head>
@@ -130,7 +130,7 @@
         </div>
     </div>
 
-    <div id="room" class="d-none">
+    <div id="room" class="d-none text-center">
         <div id="device-switch" class="text-center">
 
         </div>
@@ -185,6 +185,18 @@
 
         // 入室後表示するやつ
         const roomDiv = document.getElementById('room');
+        // イベント追加
+        const roomChange = new MutationObserver(() => {
+            // 5人以上だったらroomのpaddingを0に
+            const videoCount = document.querySelectorAll('video').length;
+            if (videoCount >= 5) {
+                roomDiv.style.padding = 0;
+            }else{
+                roomDiv.style.padding = "0 10vw";
+            }
+        });
+        roomChange.observe(roomDiv, { childList: true, subtree:true });
+
         // 自分の映像とか入れておくやつ
         const localWrapper = document.getElementById('local-video-wrapper');
         // 自分のカメラを入れておくやつ
@@ -193,16 +205,16 @@
         const videoContainer = document.getElementById('video-container');
         // 見てるよマーク入れ
         const myEyecontainer = document.querySelector('#local-video-wrapper .eyecontainer');
-        
-        const getPosition = (total,order) => {
+
+        const getPosition = (total, order) => {
             // 半径
             const radius = 20;
             // 中心
-            const center = [50,-12];
+            const center = [50, -12];
 
             // 角度（弧度法）
             // const theta = (360/total)/180 * order;
-            const theta = Math.PI/180 * (360/total * order);
+            const theta = Math.PI / 180 * (360 / total * order);
             const x = Math.sin(theta) * radius + center[0];
             const y = Math.cos(theta) * radius + center[1];
             // 配列で位置を返す

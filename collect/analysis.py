@@ -2,7 +2,7 @@ import json
 import glob
 import collections
 
-log_files = glob.glob('log/sample3/*.json')
+log_files = glob.glob('log/ワードウルフ/2回目/*.json')
 
 log_data = []
 
@@ -10,6 +10,7 @@ for log_file in log_files:
     with open(log_file, mode='r', encoding='utf-8') as f:
         # ログデータをまとまりにする
         log_data += json.load(f)
+print(len(log_data))
 
 
 def part_from():
@@ -95,9 +96,9 @@ def direct_network():
     plt.show()
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # count_look()
-    print(count_look())
+    # print(count_look())
     # with open('out.json', mode='w', encoding='utf-8') as f:
     #     json.dump(count_look(), f, indent=4, ensure_ascii=False)
     # pairplot_count()

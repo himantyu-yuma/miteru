@@ -25,9 +25,14 @@
             margin-left: 0;
         }
 
-        .video-wrapper {
+        #local-video-wrapper {
             position: relative;
         }
+
+        /* 円状に配置するとき */
+        /* #video-container>div{
+            position: absolute;
+        } */
 
         video {
             width: 24vw;
@@ -82,7 +87,7 @@
         }
 
         #room {
-            padding: 0 22vw;
+            padding: 0 10vw;
         }
     </style>
 </head>
@@ -125,17 +130,17 @@
         </div>
     </div>
 
-    <div id="room" class="d-none">
+    <div id="room" class="d-none text-center">
         <div id="device-switch" class="text-center">
 
         </div>
         <!-- <div class="form-group">
-                <label for="name">名前</label>
-                <input type="text" name="name" id="name" class="form-control">
-            </div> -->
+            <label for="name">名前</label>
+            <input type="text" name="name" id="name" class="form-control">
+        </div> -->
         <!-- <button id="join-btn" class="btn btn-primary">JOIN</button> -->
-        <div class="video-wrapper d-inline" id="video-container">
-            <div id="local-video-wrapper" class="d-inline-block video-wrapper">
+        <div class="video-wrapper" id="video-container">
+            <div id="local-video-wrapper" class="d-inline-block">
                 <!-- <video id="local-video" autoplay muted="true"></video> -->
                 <!-- <img src="img/eyecon.png" class="eyecon"> -->
                 <div class="eyecontainer">
@@ -146,7 +151,7 @@
 
         </div>
     </div>
-    <img id="stalker" src="../img/eyecon.png" alt="">
+    <img id="stalker" src="img/eyecon.png" alt="">
 
     <!-- bootstrap -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -168,17 +173,19 @@
         let logArr = [];
 
         const collectLog = (from, to) => {
+            const now = new Date();
             // 誰かが誰かを見たり、見なかったりしたらログとして集める
             // 視線を外したときは、toをnoneに
             // TODO: 自分の見たログも入れる？それとも、これはログ集積用にして別途入室させる？
             const log = {
-                time: new Date(),
+                time: now,
                 from: from,
                 to: to
             }
             // const strJSON = JSON.stringify(log, null, '\t')
             // logArr.push(strJSON);
             logArr.push(log);
+            console.log(now.toISOString());
         }
 
         const sendData = data => {

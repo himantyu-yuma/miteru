@@ -362,7 +362,7 @@
                 // 部屋に入る
                 joinRoom();
                 // 自分の映像を移動
-                localWrapper.insertBefore(localVideo, myEyecontainer);
+                localWrapper.insertBefore(localVideo, document.getElementById('local-name'));
                 // 自分の名前を表示
                 document.getElementById('local-name').textContent = document.getElementById('name').value;
                 // ボタン移動

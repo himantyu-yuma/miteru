@@ -151,7 +151,7 @@
 
         </div>
     </div>
-    <img id="stalker" src="img/eyecon.png" alt="">
+    <img id="stalker" src="../img/eyecon.png" alt="">
 
     <!-- bootstrap -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -344,7 +344,7 @@
                     remoteVideo.playsInline = true;
                     remoteVideo.setAttribute('data-peer-id', stream.peerId);
                     remoteVideoWrapper.append(remoteVideo);
-                    remoteVideo.volume = 0.5;
+                    // remoteVideo.volume = 0.5;
 
                     // eyecontainer入れる
                     const remoteEyecontainer = document.createElement('div');
@@ -364,7 +364,7 @@
                     // 見るイベント追加
                     remoteVideo.addEventListener('mouseover', () => {
                         room.send({ type: 'look', target: stream.peerId });
-                        remoteVideo.volume = 1;
+                        // remoteVideo.volume = 1;
 
                         // 枠付ける
                         remoteVideo.classList.add("look");
@@ -375,7 +375,7 @@
                     remoteVideo.addEventListener('mouseleave', () => {
                         // room.send({ type: 'unlook' });
                         room.send({ type: 'unlook', target: stream.peerId });
-                        remoteVideo.volume = 0.3;
+                        // remoteVideo.volume = 0.3;
 
                         // 枠外す
                         remoteVideo.classList.remove("look");

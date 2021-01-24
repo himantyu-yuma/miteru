@@ -73,45 +73,43 @@ def plot_wave(audio_file):
     # plt.show()
 
 
+def plot_speak():
+    speaker_data = '../audio/output/dialization/exp1/視線有1'
+    
+
 if __name__ == "__main__":
-    # どのログデータを使うか
-    log_files = glob.glob('集団1/*.json')
-    # log_files = glob.glob('集団2/*.json')
-    # log_files = glob.glob('集団5/*.json')
-    # log_files = glob.glob('集団6/*.json')
 
-    # 参加者
-    participants = ('工藤　輝空', '小山　悠斗', '中西　芽衣')
-    # participants = ('奥山和樹', '武市', '米川　大樹')
-    # participants = ('岡田絢音', '佐々木凜', '廣吉和貴')
-    # participants = ('大内 颯', '梶　縁', '濱田和貴')
+    # # exp1
+    # log_files = glob.glob('集団1/*.json')
+    # participants = ('工藤　輝空', '小山　悠斗', '中西　芽衣')
+    # audio_files = glob.glob('../audio/input/exp1/視線有*.wav')
+    # diff_times = (620.8, 911.3, 1151.766)
+    # main_title = '集団1'
 
-    # 音声ファイル
-    # audio_file = '../audio/input/exp1/視線有1.wav'
-    audio_files = glob.glob('../audio/input/exp1/視線有*.wav')
-
-    # フォント
-    font = {'family': 'Yu Gothic'}
-
-    # ログデータの最初を0としたとき，何秒後から始めるか
-    # diff_times = ((620.8, 911.3, 1151.766), (415.8, 672.2, 898.233),
-    #               (367.3, 637.6, 842.867), (460.266, 722.7, 1039.033))
-    # exp1（視線有1, 視線有2, 視線有3）
-    diff_times = (620.8, 911.3, 1151.766)
     # # exp2
+    # log_files = glob.glob('集団2/*.json')
+    # participants = ('奥山和樹', '武市', '米川　大樹')
+    # audio_files = glob.glob('../audio/input/exp2/視線有*.wav')
     # diff_times = (415.8, 672.2, 898.233)
-    # # exp5
-    # diff_times = (367.3, 637.6, 842.867)
-    # # exp6
-    # diff_times = (460.266, 722.7, 1039.033)
-
-    # グラフタイトル
-    main_title = '集団1'
     # main_title = '集団2'
+
+    # # exp5
+    # log_files = glob.glob('集団5/*.json')
+    # participants = ('岡田絢音', '佐々木凜', '廣吉和貴')
+    # audio_files = glob.glob('../audio/input/exp5/視線有*.wav')
+    # diff_times = (367.3, 637.6, 842.867)
     # main_title = '集団5'
-    # main_title = '集団6'
+
+    # exp6
+    log_files = glob.glob('集団6/*.json')
+    participants = ('大内 颯', '梶　縁', '濱田和貴')
+    audio_files = glob.glob('../audio/input/exp6/視線有*.wav')
+    diff_times = (460.266, 722.7, 1039.033)
+    main_title = '集団6'
 
     sub_titles = ['視線有1', '視線有2', '視線有3']
+    # フォント
+    font = {'family': 'Yu Gothic'}
 
     # ループ用のやつ
     tmp_zip = zip(audio_files, diff_times, sub_titles)

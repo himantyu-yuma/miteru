@@ -5,3 +5,4 @@ analize_data/**/*.*
 !analize_data/**/*.py
 !analize_data/requirements.txt
 analize_data/wsl/lib64
+!*.sh

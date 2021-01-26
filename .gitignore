@@ -1,6 +1,7 @@
 node_modules
 collect/log/**/*.json
 analysis/
+venv/
 analize_data/**/*.*
 !analize_data/**/*.py
 !analize_data/requirements.txt

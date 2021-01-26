@@ -75,7 +75,7 @@ def plot_wave(audio_file):
 
 def plot_speak(speaker_tag):
     x = []
-    speaker_file = '../audio/output/pydub_seg/exp1/視線有1.json'
+    speaker_file = glob.glob('../audio/output/pydub_seg/**/視線有*.json')
     with open(speaker_file, mode='r', encoding='utf-8') as f:
         speaker_data = json.load(f)
     for datum in speaker_data:
@@ -85,12 +85,11 @@ def plot_speak(speaker_tag):
 
 
 if __name__ == "__main__":
-
-
     # exp1
     log_files = glob.glob('集団1/*.json')
     participants = ('工藤　輝空', '小山　悠斗', '中西　芽衣')
     audio_files = glob.glob('../audio/input/exp1/視線有*.wav')
+    speaker_files = glob.glob('../audio/output/pydub_seg/exp1/視線有*.json')
     diff_times = (620.8, 911.3, 1151.766)
     main_title = '集団1'
 
@@ -98,6 +97,7 @@ if __name__ == "__main__":
     # log_files = glob.glob('集団2/*.json')
     # participants = ('奥山和樹', '武市', '米川　大樹')
     # audio_files = glob.glob('../audio/input/exp2/視線有*.wav')
+    # speaker_files = glob.glob('../audio/output/pydub_seg/exp2/視線有*.json')
     # diff_times = (415.8, 672.2, 898.233)
     # main_title = '集団2'
 
@@ -105,6 +105,7 @@ if __name__ == "__main__":
     # log_files = glob.glob('集団5/*.json')
     # participants = ('岡田絢音', '佐々木凜', '廣吉和貴')
     # audio_files = glob.glob('../audio/input/exp5/視線有*.wav')
+    # speaker_files = glob.glob('../audio/output/pydub_seg/exp5/視線有*.json')
     # diff_times = (367.3, 637.6, 842.867)
     # main_title = '集団5'
 
@@ -112,6 +113,7 @@ if __name__ == "__main__":
     # log_files = glob.glob('集団6/*.json')
     # participants = ('大内 颯', '梶　縁', '濱田和貴')
     # audio_files = glob.glob('../audio/input/exp6/視線有*.wav')
+    # speaker_files = glob.glob('../audio/output/pydub_seg/exp6/視線有*.json')
     # diff_times = (460.266, 722.7, 1039.033)
     # main_title = '集団6'
 
@@ -120,8 +122,8 @@ if __name__ == "__main__":
     font = {'family': 'Yu Gothic'}
 
     # ループ用のやつ
-    tmp_zip = zip(audio_files, diff_times, sub_titles)
-    for (audio_file, diff_time, sub_title) in tmp_zip:
+    tmp_zip = zip(audio_files, diff_times, sub_titles, speaker_files)
+    for (audio_file, diff_time, sub_title, speaker_file) in tmp_zip:
         # audio_file = audio_files[0]
         # diff_time = diff_times[0]
         # graph_title = main_titles[0] + sub_titles[0]
@@ -141,10 +143,9 @@ if __name__ == "__main__":
         # plotするデータを取得
         plot_data = [count_look(log_data, participant, first_time)
                      for participant in participants]
-        speaker_data = []
-        speaker_data.append(plot_speak('A'))
-        speaker_data.append(plot_speak('B'))
-        speaker_data.append(plot_speak('C'))
+        speaker_data = [plot_speak(speaker) for speaker in participants]
+        print(speaker_files)
+
         # x1, y1 = count_look(log_data, participant_a, first_time)
         # x2, y2 = count_look(log_data, participant_b, first_time)
         # x3, y3 = count_look(log_data, participant_c, first_time)

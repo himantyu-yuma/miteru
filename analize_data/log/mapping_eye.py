@@ -73,18 +73,26 @@ def plot_wave(audio_file):
     # plt.show()
 
 
-def plot_speak():
-    speaker_data = '../audio/output/dialization/exp1/視線有1'
-    
+def plot_speak(speaker_tag):
+    x = []
+    speaker_file = '../audio/output/pydub_seg/exp1/視線有1.json'
+    with open(speaker_file, mode='r', encoding='utf-8') as f:
+        speaker_data = json.load(f)
+    for datum in speaker_data:
+        if datum['speaker'] == speaker_tag:
+            x.append((datum['start'], datum['end']))
+    return x
+
 
 if __name__ == "__main__":
 
-    # # exp1
-    # log_files = glob.glob('集団1/*.json')
-    # participants = ('工藤　輝空', '小山　悠斗', '中西　芽衣')
-    # audio_files = glob.glob('../audio/input/exp1/視線有*.wav')
-    # diff_times = (620.8, 911.3, 1151.766)
-    # main_title = '集団1'
+
+    # exp1
+    log_files = glob.glob('集団1/*.json')
+    participants = ('工藤　輝空', '小山　悠斗', '中西　芽衣')
+    audio_files = glob.glob('../audio/input/exp1/視線有*.wav')
+    diff_times = (620.8, 911.3, 1151.766)
+    main_title = '集団1'
 
     # # exp2
     # log_files = glob.glob('集団2/*.json')
@@ -100,12 +108,12 @@ if __name__ == "__main__":
     # diff_times = (367.3, 637.6, 842.867)
     # main_title = '集団5'
 
-    # exp6
-    log_files = glob.glob('集団6/*.json')
-    participants = ('大内 颯', '梶　縁', '濱田和貴')
-    audio_files = glob.glob('../audio/input/exp6/視線有*.wav')
-    diff_times = (460.266, 722.7, 1039.033)
-    main_title = '集団6'
+    # # exp6
+    # log_files = glob.glob('集団6/*.json')
+    # participants = ('大内 颯', '梶　縁', '濱田和貴')
+    # audio_files = glob.glob('../audio/input/exp6/視線有*.wav')
+    # diff_times = (460.266, 722.7, 1039.033)
+    # main_title = '集団6'
 
     sub_titles = ['視線有1', '視線有2', '視線有3']
     # フォント
@@ -133,14 +141,21 @@ if __name__ == "__main__":
         # plotするデータを取得
         plot_data = [count_look(log_data, participant, first_time)
                      for participant in participants]
+        speaker_data = []
+        speaker_data.append(plot_speak('A'))
+        speaker_data.append(plot_speak('B'))
+        speaker_data.append(plot_speak('C'))
         # x1, y1 = count_look(log_data, participant_a, first_time)
         # x2, y2 = count_look(log_data, participant_b, first_time)
         # x3, y3 = count_look(log_data, participant_c, first_time)
-        graph_data = zip(ax, plot_data, participants)
-        for (axe, data, participant) in graph_data:
+        graph_data = zip(ax, plot_data, participants, speaker_data)
+        for (axe, data, participant, spd) in graph_data:
             axe.set_title(participant, **font)
+            axe.set_ylim(0, 2)
             axe.plot(audio_data[0], audio_data[1])
             axe.plot(data[0], data[1], marker='.', linestyle='None')
+            for v in spd:
+                axe.axvspan(v[0]/1000, v[1]/1000)
 
         # ax[0].plot(audio_data[0], audio_data[1])
         # ax[0].plot(x1, y1, marker='.', linestyle='None')

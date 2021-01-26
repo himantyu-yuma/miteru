@@ -1,4 +1,3 @@
 {
-    "git.ignoreLimitWarning": true,
-    "python.pythonPath": "analize_data\\analysis\\Scripts\\python.exe"
+    "git.ignoreLimitWarning": true
 }
